@@ -1,0 +1,16 @@
+{
+  "extraBabelPlugins": [
+    [
+      "import",
+      { "libraryName": "antd", "libraryDirectory": "es", "style": true }
+    ]
+  ],
+  "proxy": {
+    "/api": {
+      "target": "http://localhost:8080",
+      "changeOrigin": true,
+      "pathRewrite": { "^/api": "" }
+    }
+  },
+   "publicPath": "/"
+}
