@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import { Layout } from 'antd';
-// eslint-disable-next-line no-unused-vars
-import HeaderPage from '../Header/HeaderPage';
-// eslint-disable-next-line no-unused-vars
 import NavLeftPage from '../NavLeft/NavLeftPage';
 // eslint-disable-next-line no-unused-vars
 import UserTablePage from '../UserTable/UserTablePage';
@@ -16,14 +13,13 @@ export default class AdminPage extends Component {
           <NavLeftPage />
         </Sider>
         <Layout>
-          <Header
-            style={{
-              backgroundColor: 'white',
-              position: 'fixed'
-            }}
-          >
-            <HeaderPage />
-          </Header>
+          {/*<Header*/}
+          {/*  style={{*/}
+          {/*    backgroundColor: 'white'*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  <HeaderPage />*/}
+          {/*</Header>*/}
           <Content
             style={{
               backgroundColor: '#fff',

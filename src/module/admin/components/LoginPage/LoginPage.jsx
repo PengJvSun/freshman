@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { routerRedux } from 'dva/router';
 import { connect } from 'dva';
-import { Form, Icon, Input, Button, message } from 'antd';
+import { Form, Icon, Input, Button } from 'antd';
 import styles from './LoginPage.less';
+import request from '../../../../utils/request';
 
 const Item = Form.Item;
 export default
@@ -13,18 +14,28 @@ class LoginPage extends Component {
     //阻止表单的提交
     e.preventDefault();
     const { dispatch } = this.props;
+    // this.getUserInfo();
     //对表单所有的数据进行统一验证
     this.props.form.validateFields((err, values) => {
-      const username = '1111';
-      const password = '1111';
-      if (
-        `${values.username}` !== username ||
-        `${values.password}` !== password
-      ) {
-        message.error('登录失败');
-      } else {
-        dispatch(routerRedux.push('/admin'));
-      }
+      const result = request.get('/user');
+      let userInfo = null;
+      result
+        .then(({ res }) => {
+          userInfo = res;
+        })
+        .then(() => {
+          for (let i = 0; i < userInfo.length; i++) {
+            let username = userInfo[i].username;
+            let password = userInfo[i].password;
+            if (
+              `${values.username}` === username &&
+              `${values.password}` === password
+            ) {
+              console.log(username, password);
+              dispatch(routerRedux.push('/admin'));
+            }
+          }
+        });
     });
   };
 

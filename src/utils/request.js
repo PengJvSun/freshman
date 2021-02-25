@@ -17,14 +17,16 @@ function parseJSON(response) {
 }
 
 function checkCode(response) {
-  const { code, error, trace } = response;
-  if (code === 0) {
-    return response;
-  }
-  const err = new Error(error);
-  err.code = code;
-  err.trace = trace;
-  throw err;
+  // const { code, error, trace } = response;
+  // return response;
+  // if (code === 0) {
+  //   return response;
+  // }
+  // const err = new Error(error);
+  // err.code = code;
+  // err.trace = trace;
+  // throw err;
+  return response;
 }
 
 const request = {

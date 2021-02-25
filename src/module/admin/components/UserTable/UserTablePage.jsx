@@ -11,15 +11,10 @@ import {
   Col,
   Drawer
 } from 'antd';
-const data = [];
-for (let i = 0; i < 3; i++) {
-  data.push({
-    key: i.toString(),
-    name: `Edward ${i + 1}`,
-    age: `${i + 1}`,
-    address: `London Park no. ${i + 1}`
-  });
-}
+
+import request from '../../../../utils/request';
+const { Search } = Input;
+
 const EditableContext = React.createContext(undefined, undefined);
 
 class EditableCell extends React.Component {
@@ -74,8 +69,12 @@ export default
 class UserTablePage extends Component {
   constructor(props) {
     super(props);
-    this.state = { data, editingKey: '', visible: false };
-    //console.log(this.state.data.length);
+    this.state = {
+      data: [],
+      editingKey: '',
+      visible: false,
+      selectedRowKeys: []
+    };
     this.columns = [
       {
         title: () => {
@@ -88,9 +87,6 @@ class UserTablePage extends Component {
         },
         dataIndex: 'operation',
         render: (text, record) => {
-          // eslint-disable-next-line no-unused-vars
-          const dataLength = this.state.data.length;
-          // eslint-disable-next-line no-unused-vars
           const editable = this.isEditing(record);
           if (editable) {
             return (
@@ -129,7 +125,6 @@ class UserTablePage extends Component {
               </span>
             );
           }
-          console.log(dataLength);
         }
       },
       {
@@ -163,6 +158,22 @@ class UserTablePage extends Component {
         editable: true
       }
     ];
+  }
+
+  componentDidMount() {
+    request.get('/user').then(res => {
+      let userInfo = res.res;
+      const data = [];
+      for (let i = 0; i < userInfo.length; i++) {
+        data.push({
+          key: userInfo[i].id,
+          name: userInfo[i].username,
+          age: userInfo[i].age,
+          address: userInfo[i].address
+        });
+      }
+      this.setState({ data });
+    });
   }
 
   isEditing = record => record.key === this.state.editingKey;
@@ -200,18 +211,21 @@ class UserTablePage extends Component {
     const data = [...this.state.data];
     this.setState({ data: data.filter(item => item.key !== key) });
   }
-  //增加
-  handleAdd = () => {
-    const { data } = this.state;
-    const newData = {
-      key: this.state.data.length + 1,
-      name: `Edward${this.state.data.length + 1}`,
-      age: `${this.state.data.length + 1}`,
-      address: `London, Park no.${this.state.data.length + 1}`
-    };
-    this.setState({
-      data: [...data, newData]
-    });
+  //全部删除
+  handleDeleteAll = () => {
+    const selectedRowKeys = this.state.selectedRowKeys; //选中的id
+    console.log(selectedRowKeys);
+    //const data = [...this.state.data];
+    this.setState({ data: [] });
+  };
+  //查询按钮事件回调
+  handleSearch = value => {
+    for (let i = 0; i < this.state.data.length; i++) {
+      if (value === this.state.data[i].name) {
+        const data = [...this.state.data];
+        this.setState({ data: data.filter(item => item.name === value) });
+      }
+    }
   };
   //展示增加用户的抽屉
   showDrawer = () => {
@@ -225,8 +239,9 @@ class UserTablePage extends Component {
       visible: false
     });
   };
-  //点击提交增加用户回调
+  //增加用户
   addUser = () => {
+    const { data } = this.state;
     const newData = {
       key: this.state.data.length + 1,
       name: this.props.form.getFieldValue('name'),
@@ -236,6 +251,12 @@ class UserTablePage extends Component {
     this.setState({
       data: [...data, newData],
       visible: false
+    });
+  };
+  //刷新页面
+  handleReloadTable = () => {
+    this.setState({
+      data: this.state.data
     });
   };
   render() {
@@ -268,34 +289,54 @@ class UserTablePage extends Component {
           'selectedRows: ',
           selectedRows
         );
+        this.setState({
+          selectedRowKeys: selectedRowKeys,
+          selectedRows: selectedRows
+        });
       }
     };
+
     //拿到抽屉表格
     const { getFieldDecorator } = this.props.form;
     return (
       <div>
         <EditableContext.Provider value={this.props.form}>
           <div>
-            <Button
-              type="primary"
-              onClick={this.start}
-              style={{ marginLeft: '5%', marginTop: '3px' }}
-            >
-              全部删除
-            </Button>
-            <Button
-              type="primary"
-              onClick={this.showDrawer}
-              style={{ marginLeft: '90%', marginTop: '3px' }}
-            >
-              增加
-            </Button>
+            <div style={{ marginTop: '6px' }}>
+              <Button
+                type="primary"
+                onClick={this.handleDeleteAll}
+                style={{ marginLeft: '10px' }}
+              >
+                全部删除
+              </Button>
+              <Button
+                type="primary"
+                onClick={this.showDrawer}
+                style={{ marginLeft: '20px' }}
+              >
+                增加
+              </Button>
+              <Search
+                placeholder="搜索"
+                onSearch={this.handleSearch}
+                style={{ width: 200, marginLeft: '60%' }}
+                enterButton
+              />
+              <Button
+                type="primary"
+                style={{ marginLeft: '5px' }}
+                onClick={this.handleReloadTable}
+              >
+                <Icon type="reload" />
+              </Button>
+            </div>
             <Drawer
               title="增加用户"
               width={400}
               onClose={this.addPageCancel}
               visible={this.state.visible}
-              placement={'left'}
+              placement={'right'}
             >
               <Form layout="vertical" onSubmit={this.addUser}>
                 <Row gutter={12}>
